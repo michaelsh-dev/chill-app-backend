@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 // BRAND
 import logo from "../assets/brand/logo.png";
@@ -103,6 +104,37 @@ function Row({ title, items, variant, onSelect }) {
 
 export default function Home() {
   const [openMenu, setOpenMenu] = useState(false);
+  const [movies, setMovies] = useState([]);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:3000/movie", {
+      headers: token
+        ? { Authorization: "Bearer " + token }
+        : {}
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Gagal ambil data movie");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        const movieData = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
+        setMovies(movieData);
+      })
+      .catch((err) => {
+        console.log(err);
+        setMovies([]);
+      });
+  }, []);
+
+  const movieRows = movies.map((m) => ({
+    id: m.id,
+    title: m.title,
+    genre: m.genre,
+    img: m.poster || pMissing, // fallback image
+  }));
 
   const [muted, setMuted] = useState(true);
   const [openMore, setOpenMore] = useState(false);
@@ -993,6 +1025,12 @@ export default function Home() {
 
 
         <div className="rows">
+          <Row
+            title="Dari Database"
+            items={movieRows}
+            variant="portrait"
+            onSelect={handleSelectMovie}
+          />
           <Row title="Melanjutkan Tonton Film" items={rows.lanjut} variant="landscape" onSelect={handleSelectMovie} />
           <Row title="Top Rating Film dan Series Hari ini" items={rows.top} variant="portrait" onSelect={handleSelectMovie} />
           <Row title="Film Trending" items={rows.trending} variant="portrait" onSelect={handleSelectMovie} />
