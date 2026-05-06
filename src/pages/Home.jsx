@@ -1,6 +1,5 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 
 // BRAND
 import logo from "../assets/brand/logo.png";
@@ -38,6 +37,14 @@ import pTedlassoEp3 from "../assets/posters/tedlassoep3.png";
 import pTedlassoEp4 from "../assets/posters/tedlassoep4.png";
 import pTedlassoEp5 from "../assets/posters/tedlassoep5.png";
 import pTedlassoEp1Vid from "../assets/posters/tedlassoep1vid.png";
+
+const posterMap = {
+  "blue-lock.png": pBlueLock,
+  "batman.png": pBatman,
+  "suzume.png": pSuzume,
+  "otto.png": pOtto,
+  "a_man_called_otto.png": pCalledotto,
+};
 
 
 function Row({ title, items, variant, onSelect }) {
@@ -105,14 +112,9 @@ function Row({ title, items, variant, onSelect }) {
 export default function Home() {
   const [openMenu, setOpenMenu] = useState(false);
   const [movies, setMovies] = useState([]);
-  useEffect(() => {
-    const token = localStorage.getItem("token");
 
-    fetch("http://localhost:3000/movie", {
-      headers: token
-        ? { Authorization: "Bearer " + token }
-        : {}
-    })
+  useEffect(() => {
+    fetch("http://localhost:3000/api/movies")
       .then((res) => {
         if (!res.ok) {
           throw new Error("Gagal ambil data movie");
@@ -120,8 +122,33 @@ export default function Home() {
         return res.json();
       })
       .then((data) => {
-        const movieData = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
-        setMovies(movieData);
+        const movieData = Array.isArray(data)
+          ? data
+          : Array.isArray(data.data)
+            ? data.data
+            : [];
+
+        const mappedMovies = movieData
+          .filter((m) => m.poster)
+          .map((m) => ({
+            id: m.id,
+            title: m.title,
+            genre: m.genre,
+            desc: m.description,
+            img: m.poster?.startsWith("http")
+              ? m.poster
+              : posterMap[m.poster] || pMissing,
+            rating: m.rating,
+            year: m.release_year,
+            duration: m.duration,
+            age: m.age_rating,
+            cast: m.cast,
+            creator: m.director,
+            videoTo: m.video_url,
+            kind: m.kind || "movie",
+          }));
+
+        setMovies(mappedMovies);
       })
       .catch((err) => {
         console.log(err);
@@ -220,9 +247,6 @@ export default function Home() {
     };
   };
 
-
-
-
   const toggleMyList = (movie) => {
     const fixed = normalizeMovie(movie);
 
@@ -248,13 +272,13 @@ export default function Home() {
         title: "Movie",
         dur: m?.duration ?? "2j 00m",
         thumb: m?.img,
+        playerThumb: m?.img,
         desc: "Putar film ini.",
         videoTo: `/video/${m?.id}`,
+        videoUrl: m?.videoTo || m?.video_url || m?.videoUrl,
       },
     ];
   };
-
-
 
   const handleSelectMovie = (m) => {
     // ✅ penting: normalize biar detail ga kosong
@@ -988,11 +1012,11 @@ export default function Home() {
                           onClick={() =>
                             navigate(ep.videoTo || `/video/${activeMovie.id}/${ep.no}`, {
                               state: {
-                                // layar player pakai gambar "vid" kalau ada
                                 playerThumb: ep.playerThumb ?? ep.thumb ?? activeMovie.img,
+                                videoUrl: ep.videoUrl || activeMovie.videoTo,
                                 seriesTitle: activeMovie.title,
-                                playlist: getPlayList(activeMovie), // <- penting buat episode selanjutnya & list
-                                index: (ep.no ?? 1) - 1,            // <- posisi episode sekarang
+                                playlist: getPlayList(activeMovie),
+                                index: (ep.no ?? 1) - 1,
                               },
                             })
                           }
@@ -1025,13 +1049,17 @@ export default function Home() {
 
 
         <div className="rows">
-          <Row
-            title="Dari Database"
-            items={movieRows}
-            variant="portrait"
-            onSelect={handleSelectMovie}
-          />
           <Row title="Melanjutkan Tonton Film" items={rows.lanjut} variant="landscape" onSelect={handleSelectMovie} />
+
+          {movies.length > 0 && (
+            <Row
+              title="Film Terbaru"
+              items={movies}
+              variant="portrait"
+              onSelect={handleSelectMovie}
+            />
+          )}
+
           <Row title="Top Rating Film dan Series Hari ini" items={rows.top} variant="portrait" onSelect={handleSelectMovie} />
           <Row title="Film Trending" items={rows.trending} variant="portrait" onSelect={handleSelectMovie} />
           <Row title="Rilis Baru" items={rows.rilis} variant="portrait" onSelect={handleSelectMovie} />

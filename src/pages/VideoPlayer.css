@@ -263,3 +263,21 @@
   bottom: 110px !important;   /* biar sejajar area kontrol */
   top: auto !important;
 }
+.vpYoutube {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.vpClose {
+  z-index: 5;
+}
+
+.vpCaption,
+.vpSkipIntro {
+  pointer-events: none;
+}

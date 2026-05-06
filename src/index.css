@@ -1137,3 +1137,40 @@ img{ max-width:100%; display:block; }
   align-items:center;
   gap:10px;
 }
+
+/* ===== BACKEND MOVIES ROW FIX ===== */
+.poster--portrait{
+  flex: 0 0 180px;
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
+}
+
+.poster--portrait .posterMedia{
+  width: 100%;
+  height: 260px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.poster--portrait .posterImg{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.posterCap{
+  height: 42px;
+  align-items: center;
+}
+
+.posterCapTitle{
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.posterCapMeta{
+  flex-shrink: 0;
+}

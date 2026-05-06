@@ -14,8 +14,10 @@ export default function ProfilSaya() {
 
     // form dummy (kamu bisa ganti nanti)
     // ✅ ambil dari localStorage dulu biar gak nyangkut William terus
-    const [name, setName] = useState(() => localStorage.getItem("profileName") || "William");
-    const [email, setEmail] = useState(() => localStorage.getItem("profileEmail") || "william1980@gmail.com");
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+
+    const [name, setName] = useState(() => currentUser.fullname || currentUser.username || "User");
+    const [email, setEmail] = useState(() => currentUser.email || "");
 
     // ✅ jangan pake "********" sebagai value, itu bikin editing aneh
     const [pass, setPass] = useState(() => localStorage.getItem("profilePass") || "");
@@ -23,12 +25,17 @@ export default function ProfilSaya() {
     const [savedMsg, setSavedMsg] = useState("");
 
     useEffect(() => {
-        const n = localStorage.getItem("profileName");
-        const e = localStorage.getItem("profileEmail");
-        const p = localStorage.getItem("profilePass");
+        const user = JSON.parse(localStorage.getItem("currentUser") || "{}");
 
-        if (n !== null) setName(n);
-        if (e !== null) setEmail(e);
+        if (user.fullname || user.username) {
+            setName(user.fullname || user.username);
+        }
+
+        if (user.email) {
+            setEmail(user.email);
+        }
+
+        const p = localStorage.getItem("profilePass");
         if (p !== null) setPass(p);
     }, []);
 
@@ -152,7 +159,7 @@ export default function ProfilSaya() {
 
                     {openMenu && (
                         <div className="menu">
-                            <Link className="menuItem" to="/profil">
+                            <Link className="menuItem" to="/profil" onClick={() => setOpenMenu(false)}>
                                 <span className="miIcon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M12 12a4.5 4.5 0 1 0-4.5-4.5A4.5 4.5 0 0 0 12 12Zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5Z" />
@@ -161,7 +168,7 @@ export default function ProfilSaya() {
                                 <span>Profil Saya</span>
                             </Link>
 
-                            <Link className="menuItem" to="/premium">
+                            <Link className="menuItem" to="/premium" onClick={() => setOpenMenu(false)}>
                                 <span className="miIcon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 14H5L3 7Zm4.2 12h9.6l1-7.2-1.9 1.2L12 6.8 8.1 13l-1.9-1.2L7.2 19Z" />
@@ -170,7 +177,16 @@ export default function ProfilSaya() {
                                 <span>Ubah Premium</span>
                             </Link>
 
-                            <Link className="menuItem" to="/">
+                            <Link
+                                className="menuItem"
+                                to="/"
+                                onClick={() => {
+                                    localStorage.removeItem("isLogin");
+                                    localStorage.removeItem("token");
+                                    localStorage.removeItem("currentUser");
+                                    setOpenMenu(false);
+                                }}
+                            >
                                 <span className="miIcon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M10 17v2H4V5h6v2H6v10h4Zm3.6-1.6L12.2 14H21v-4h-8.8l1.4-1.4L12.2 7l-5 5 5 5 1.4-1.6Z" />
@@ -180,7 +196,6 @@ export default function ProfilSaya() {
                             </Link>
                         </div>
                     )}
-
                 </div>
             </header>
 

@@ -30,6 +30,8 @@ export default function VideoPlayer() {
         state?.thumb ||
         "";
 
+    const videoUrl = state?.videoUrl || currentEp?.videoUrl || "";
+
     const seriesTitle = state?.seriesTitle || state?.title || "Tontonan";
     const epTitle = currentEp?.title || state?.epTitle || (episodeNo ? `Episode ${episodeNo}` : "Movie");
 
@@ -87,17 +89,28 @@ export default function VideoPlayer() {
                     ✕
                 </button>
 
-                <div className="vpShade" />
+                {videoUrl && (
+                    <iframe
+                        className="vpYoutube"
+                        src={videoUrl}
+                        title={seriesTitle}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                    />
+                )}
 
+                {!videoUrl && <div className="vpShade" />}
                 {/* Center Play/Pause */}
-                <button
-                    type="button"
-                    className="vpCenterBtn"
-                    onClick={() => setPaused((v) => !v)}
-                    aria-label={paused ? "Play" : "Pause"}
-                >
-                    {paused ? "▶" : "⏸"}
-                </button>
+                {!videoUrl && (
+                    <button
+                        type="button"
+                        className="vpCenterBtn"
+                        onClick={() => setPaused((v) => !v)}
+                        aria-label={paused ? "Play" : "Pause"}
+                    >
+                        {paused ? "▶" : "⏸"}
+                    </button>
+                )}
 
                 {/* Caption overlay (fake subtitle like figma) */}
                 {captionOn && (
